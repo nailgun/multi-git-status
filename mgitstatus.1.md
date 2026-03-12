@@ -8,7 +8,7 @@ mgitstatus - Show uncommitted, untracked and unpushed changes for multiple Git r
 
 # SYNOPSIS
 
- **mgitstatus** [**\--version**] [**-w**] [**-e**] [**-f**] [**\--throttle** SEC] [**\-c**] [**-d/\--depth**=2] [**\--flatten**] [**\--no-X**] [**DIR** [**DIR**]...]
+ **mgitstatus** [**\--version**] [**-w**] [**-e**] [**-f**] [**\--throttle** SEC] [**\-c**] [**-d/\--depth** 2] [**\--flatten**] [**\--no-X**] [**DIR** [**DIR**]...]
 
 # DESCRIPTION
 
@@ -61,7 +61,7 @@ mgitstatus makes no guarantees that all states are taken into account.
 **-c**
 :   Force color output (preserve colors when using pipes)
 
-**-d, \--depth=2**
+**-d, \--depth 2**
 :   Scan this many directories deep. Default is 2. If **0**, the scan is infinitely deep
 
 **\--no-depth**
