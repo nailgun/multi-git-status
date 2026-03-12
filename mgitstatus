@@ -177,36 +177,33 @@ if [ "$NO_DEPTH" -eq 1 ]; then
     FIND_OPTS="$FIND_OPTS -maxdepth 0"
 fi
 
-
 # Go through positional arguments (DIRs) or '.' if no argumnets are given
 for DIR in "${@:-"."}"; do
     # We *want* to expand parameters, so disable shellcheck for this error:
     # shellcheck disable=SC2086
-    find -L "$DIR" $FIND_OPTS -type d | while read -r PROJ_DIR
+    find -L "$DIR" $FIND_OPTS -name .git -prune -o -type d -print | while read -r PROJ_DIR
     do
         GIT_DIR="$PROJ_DIR/.git"
         GIT_CONF="$PROJ_DIR/.git/config"
+
+        # If this dir is not a repo, and WARN_NOT_REPO is 1, tell the user.
+        if [ ! -e "$GIT_DIR" ]; then
+            if [ "$WARN_NOT_REPO" -eq 1 ] && [ "$PROJ_DIR" != "." ]; then
+                printf "${PROJ_DIR}: not a git repo\n"
+            fi
+            continue
+        fi
         
         # Check if the repo is safe (https://github.blog/2022-04-12-git-security-vulnerability-announced/)
-        if [ -d "$GIT_DIR" ]; then
-            GIT_DIR_OWNER="$(ls -ld "$GIT_DIR" | awk 'NR==1 {print $3}')"
-            if [ "$ID" != "$GIT_DIR_OWNER" ]; then
-                printf "${PROJ_DIR}: ${C_UNSAFE}Unsafe ownership, owned by someone else. Skipping.${C_RESET}\n"
-                continue
-            fi
+        GIT_DIR_OWNER="$(ls -ld "$GIT_DIR" | awk 'NR==1 {print $3}')"
+        if [ "$ID" != "$GIT_DIR_OWNER" ]; then
+            printf "${PROJ_DIR}: ${C_UNSAFE}Unsafe ownership, owned by someone else. Skipping.${C_RESET}\n"
+            continue
         fi
 
         # Check git config for this project to see if we should ignore this repo.
         IGNORE=$(git config -f "$GIT_CONF" --bool mgitstatus.ignore)
         if [ "$IGNORE" = "true" ]; then
-            continue
-        fi
-
-        # If this dir is not a repo, and WARN_NOT_REPO is 1, tell the user.
-        if [ ! -d "$GIT_DIR" ]; then
-            if [ "$WARN_NOT_REPO" -eq 1 ] && [ "$PROJ_DIR" != "." ]; then
-                printf "${PROJ_DIR}: not a git repo\n"
-            fi
             continue
         fi
 
